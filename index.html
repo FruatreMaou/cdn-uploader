@@ -1,0 +1,385 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Upload File ke GitHub - Modern CDN</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&family=Open+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+    <link rel="icon" type="image/x-icon" href="https://i.pinimg.com/736x/0d/71/2a/0d712a0b6805c0b44386339048bdfce5.jpg?format=png&name=900x900">
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: {
+                        'poppins': ['Poppins', 'sans-serif'],
+                        'opensans': ['Open Sans', 'sans-serif'],
+                    },
+                    animation: {
+                        'float': 'float 6s ease-in-out infinite',
+                        'pulse-slow': 'pulse 3s cubic-bezier(0.4, 0, 0.6, 1) infinite',
+                        'bounce-slow': 'bounce 2s infinite',
+                        'fade-in': 'fadeIn 0.8s ease-out',
+                        'slide-up': 'slideUp 0.6s ease-out',
+                        'scale-in': 'scaleIn 0.5s ease-out',
+                    },
+                    keyframes: {
+                        float: {
+                            '0%, 100%': { transform: 'translateY(0px)' },
+                            '50%': { transform: 'translateY(-20px)' },
+                        },
+                        fadeIn: {
+                            '0%': { opacity: '0' },
+                            '100%': { opacity: '1' },
+                        },
+                        slideUp: {
+                            '0%': { transform: 'translateY(30px)', opacity: '0' },
+                            '100%': { transform: 'translateY(0)', opacity: '1' },
+                        },
+                        scaleIn: {
+                            '0%': { transform: 'scale(0.9)', opacity: '0' },
+                            '100%': { transform: 'scale(1)', opacity: '1' },
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        body {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 25%, #f093fb 50%, #f5576c 75%, #4facfe 100%);
+            background-size: 400% 400%;
+            animation: gradientShift 15s ease infinite;
+            font-family: 'Open Sans', sans-serif;
+        }
+        
+        @keyframes gradientShift {
+            0% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+            100% { background-position: 0% 50%; }
+        }
+        
+        .glass-card {
+            background: rgba(255, 255, 255, 0.15);
+            backdrop-filter: blur(20px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            box-shadow: 
+                0 25px 45px rgba(0, 0, 0, 0.1),
+                0 0 60px rgba(124, 58, 237, 0.3),
+                inset 0 1px 0 rgba(255, 255, 255, 0.3);
+        }
+        
+        .glass-card:hover {
+            transform: translateY(-8px) scale(1.02);
+            box-shadow: 
+                0 35px 60px rgba(0, 0, 0, 0.15),
+                0 0 80px rgba(167, 139, 250, 0.4),
+                inset 0 1px 0 rgba(255, 255, 255, 0.4);
+        }
+        
+        .btn-primary {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .btn-primary::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.3), transparent);
+            transition: left 0.5s;
+        }
+        
+        .btn-primary:hover::before {
+            left: 100%;
+        }
+        
+        .file-input-wrapper {
+            position: relative;
+            overflow: hidden;
+            display: inline-block;
+            width: 100%;
+        }
+        
+        .file-input {
+            position: absolute;
+            left: -9999px;
+        }
+        
+        .file-input-label {
+            background: rgba(255, 255, 255, 0.1);
+            border: 2px dashed rgba(255, 255, 255, 0.3);
+            transition: all 0.3s ease;
+            cursor: pointer;
+        }
+        
+        .file-input-label:hover {
+            border-color: rgba(255, 255, 255, 0.6);
+            background: rgba(255, 255, 255, 0.2);
+            transform: scale(1.02);
+        }
+        
+        .file-input-label.file-selected {
+            border-color: #10b981;
+            background: rgba(16, 185, 129, 0.1);
+        }
+        
+        .progress-bar {
+            width: 0%;
+            transition: width 0.3s ease;
+        }
+        
+        .mascot-container {
+            position: relative;
+            display: inline-block;
+        }
+        
+        .mascot-glow {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 120%;
+            height: 120%;
+            background: radial-gradient(circle, rgba(167, 139, 250, 0.3) 0%, transparent 70%);
+            border-radius: 50%;
+            animation: pulse-slow 3s infinite;
+        }
+        
+        .success-checkmark {
+            display: none;
+            width: 60px;
+            height: 60px;
+            border-radius: 50%;
+            background: #10b981;
+            position: relative;
+            margin: 0 auto 20px;
+        }
+        
+        .success-checkmark::after {
+            content: '✓';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            color: white;
+            font-size: 30px;
+            font-weight: bold;
+        }
+        
+        @media (max-width: 640px) {
+            .glass-card {
+                margin: 1rem;
+                padding: 1.5rem;
+            }
+        }
+    </style>
+</head>
+<body class="min-h-screen flex flex-col items-center justify-center p-4 animate-fade-in">
+    <!-- Header dengan Mascot -->
+    <div class="text-center mb-8 animate-slide-up">
+        <div class="mascot-container mb-6">
+            <div class="mascot-glow"></div>
+            <img src="https://media.tenor.com/yWaLIc5J9WgAAAAj/momoi.gif" 
+                 class="w-32 h-32 md:w-40 md:h-40 rounded-full shadow-2xl border-4 border-white/30 animate-float object-cover" 
+                 alt="Mascot Animasi">
+        </div>
+        <h1 class="text-4xl md:text-5xl font-poppins font-bold text-white mb-4 drop-shadow-lg">
+            GitHub CDN
+        </h1>
+        <p class="text-lg md:text-xl font-opensans text-white/90 max-w-md mx-auto leading-relaxed">
+            Upload file Anda dengan mudah dan dapatkan URL CDN instan untuk berbagi
+        </p>
+    </div>
+
+    <!-- Main Upload Card -->
+    <div class="glass-card rounded-3xl p-8 md:p-10 w-full max-w-lg transition-all duration-500 ease-out animate-scale-in">
+        <form id="uploadForm" action="/upload" method="post" encType="multipart/form-data" class="space-y-8">
+            <!-- File Input Area -->
+            <div class="file-input-wrapper">
+                <input type="file" name="file" id="fileInput" class="file-input" required>
+                <label for="fileInput" class="file-input-label block w-full p-8 rounded-2xl text-center transition-all duration-300">
+                    <div id="fileInputContent">
+                        <svg class="w-12 h-12 mx-auto mb-4 text-white/70" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12"></path>
+                        </svg>
+                        <p class="text-white font-poppins font-medium text-lg mb-2">Pilih file untuk diupload</p>
+                        <p class="text-white/70 font-opensans text-sm">Klik atau drag & drop file di sini</p>
+                    </div>
+                    <div id="fileSelectedContent" class="hidden">
+                        <svg class="w-12 h-12 mx-auto mb-4 text-green-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                        </svg>
+                        <p class="text-white font-poppins font-medium text-lg mb-2">File siap diupload</p>
+                        <p id="fileName" class="text-white/90 font-opensans text-sm"></p>
+                    </div>
+                </label>
+            </div>
+
+            <!-- Progress Bar -->
+            <div id="progressContainer" class="hidden">
+                <div class="bg-white/20 rounded-full h-3 overflow-hidden">
+                    <div id="progressBar" class="progress-bar bg-gradient-to-r from-green-400 to-blue-500 h-full rounded-full"></div>
+                </div>
+                <p class="text-white/90 text-center mt-2 font-opensans text-sm">Mengupload file...</p>
+            </div>
+
+            <!-- Upload Button -->
+            <button type="submit" id="uploadButton" 
+                    class="btn-primary w-full py-4 px-8 rounded-2xl text-white font-poppins font-semibold text-lg
+                           transform transition-all duration-300 ease-out
+                           hover:scale-105 hover:shadow-2xl
+                           focus:outline-none focus:ring-4 focus:ring-purple-300/50
+                           disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none">
+                <span id="buttonText">Upload File</span>
+                <svg id="loadingIcon" class="hidden animate-spin w-6 h-6 inline-block ml-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                    <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                </svg>
+            </button>
+        </form>
+    </div>
+
+    <!-- Footer -->
+    <footer class="mt-12 text-center animate-slide-up">
+        <p class="text-white/80 font-opensans mb-4 text-lg">Source Code:</p>
+        <a href="https://github.com/Rapikz-kwontwol/web-uploadfile-to-github" 
+           target="_blank" 
+           rel="noopener noreferrer"
+           class="inline-block transform transition-all duration-300 hover:scale-110">
+            <img src="https://img.shields.io/badge/GITHUB-gray.svg?style=for-the-badge&logo=github"
+                 alt="GitHub Repository"
+                 class="rounded-lg shadow-lg hover:shadow-xl">
+        </a>
+        
+        <!-- Audio Player -->
+        <div class="mt-8">
+            <audio controls class="rounded-xl shadow-lg bg-white/10 backdrop-blur-sm">
+                <source src="https://files.catbox.moe/ar2c1c.mp3" type="audio/mpeg">
+                Browser Anda tidak mendukung audio player.
+            </audio>
+        </div>
+    </footer>
+
+    <script>
+        const uploadForm = document.getElementById('uploadForm');
+        const uploadButton = document.getElementById('uploadButton');
+        const buttonText = document.getElementById('buttonText');
+        const loadingIcon = document.getElementById('loadingIcon');
+        const fileInput = document.getElementById('fileInput');
+        const fileInputLabel = document.querySelector('.file-input-label');
+        const fileInputContent = document.getElementById('fileInputContent');
+        const fileSelectedContent = document.getElementById('fileSelectedContent');
+        const fileName = document.getElementById('fileName');
+        const progressContainer = document.getElementById('progressContainer');
+        const progressBar = document.getElementById('progressBar');
+
+        // File input change handler
+        fileInput.addEventListener('change', function(e) {
+            if (e.target.files.length > 0) {
+                const file = e.target.files[0];
+                fileName.textContent = file.name;
+                fileInputContent.classList.add('hidden');
+                fileSelectedContent.classList.remove('hidden');
+                fileInputLabel.classList.add('file-selected');
+                
+                // Add success animation
+                fileSelectedContent.style.animation = 'scaleIn 0.5s ease-out';
+            } else {
+                fileInputContent.classList.remove('hidden');
+                fileSelectedContent.classList.add('hidden');
+                fileInputLabel.classList.remove('file-selected');
+            }
+        });
+
+        // Drag and drop functionality
+        fileInputLabel.addEventListener('dragover', function(e) {
+            e.preventDefault();
+            this.style.borderColor = 'rgba(255, 255, 255, 0.8)';
+            this.style.background = 'rgba(255, 255, 255, 0.3)';
+        });
+
+        fileInputLabel.addEventListener('dragleave', function(e) {
+            e.preventDefault();
+            this.style.borderColor = 'rgba(255, 255, 255, 0.3)';
+            this.style.background = 'rgba(255, 255, 255, 0.1)';
+        });
+
+        fileInputLabel.addEventListener('drop', function(e) {
+            e.preventDefault();
+            this.style.borderColor = 'rgba(255, 255, 255, 0.3)';
+            this.style.background = 'rgba(255, 255, 255, 0.1)';
+            
+            const files = e.dataTransfer.files;
+            if (files.length > 0) {
+                fileInput.files = files;
+                fileInput.dispatchEvent(new Event('change'));
+            }
+        });
+
+        // Form submit handler
+        uploadForm.addEventListener('submit', function(e) {
+            if (!fileInput.files.length) {
+                e.preventDefault();
+                alert('Silakan pilih file terlebih dahulu!');
+                return;
+            }
+
+            // Show loading state
+            uploadButton.disabled = true;
+            buttonText.textContent = 'Mengupload...';
+            loadingIcon.classList.remove('hidden');
+            progressContainer.classList.remove('hidden');
+            
+            // Simulate progress (since we can't track real progress easily)
+            let progress = 0;
+            const progressInterval = setInterval(() => {
+                progress += Math.random() * 15;
+                if (progress > 90) progress = 90;
+                progressBar.style.width = progress + '%';
+            }, 200);
+
+            // Clean up interval when form actually submits
+            setTimeout(() => {
+                clearInterval(progressInterval);
+                progressBar.style.width = '100%';
+            }, 3000);
+        });
+
+        // Add some interactive effects
+        document.addEventListener('mousemove', function(e) {
+            const cards = document.querySelectorAll('.glass-card');
+            cards.forEach(card => {
+                const rect = card.getBoundingClientRect();
+                const x = e.clientX - rect.left;
+                const y = e.clientY - rect.top;
+                
+                if (x >= 0 && x <= rect.width && y >= 0 && y <= rect.height) {
+                    const centerX = rect.width / 2;
+                    const centerY = rect.height / 2;
+                    const rotateX = (y - centerY) / 10;
+                    const rotateY = (centerX - x) / 10;
+                    
+                    card.style.transform = `perspective(1000px) rotateX(${rotateX}deg) rotateY(${rotateY}deg) translateY(-8px) scale(1.02)`;
+                } else {
+                    card.style.transform = '';
+                }
+            });
+        });
+
+        // Keyboard accessibility
+        document.addEventListener('keydown', function(e) {
+            if (e.key === 'Enter' && e.target === fileInputLabel) {
+                fileInput.click();
+            }
+        });
+    </script>
+</body>
+</html>
+
