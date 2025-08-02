@@ -1,0 +1,197 @@
+/* Critical CSS - optimized for performance */
+body {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 25%, #f093fb 50%, #f5576c 75%, #4facfe 100%);
+    background-size: 400% 400%;
+    animation: gradientShift 15s ease infinite;
+    font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 1rem;
+    margin: 0;
+}
+
+@keyframes gradientShift {
+    0% { background-position: 0% 50%; }
+    50% { background-position: 100% 50%; }
+    100% { background-position: 0% 50%; }
+}
+
+.glass-card {
+    background: rgba(255, 255, 255, 0.15);
+    backdrop-filter: blur(20px);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    box-shadow: 0 25px 45px rgba(0, 0, 0, 0.1);
+    border-radius: 1.5rem;
+    padding: 2rem;
+    width: 100%;
+    max-width: 32rem;
+    transition: transform 0.3s ease;
+    will-change: transform;
+}
+
+.glass-card:hover {
+    transform: translateY(-4px);
+}
+
+.btn-primary {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+    padding: 1rem 2rem;
+    border-radius: 1rem;
+    border: none;
+    font-weight: 600;
+    width: 100%;
+    cursor: pointer;
+    transition: transform 0.2s ease;
+    will-change: transform;
+}
+
+.btn-primary:hover:not(:disabled) {
+    transform: scale(1.02);
+}
+
+.btn-primary:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+    transform: none;
+}
+
+.file-input-wrapper {
+    position: relative;
+    width: 100%;
+}
+
+.file-input {
+    position: absolute;
+    left: -9999px;
+    opacity: 0;
+}
+
+.file-input-label {
+    background: rgba(255, 255, 255, 0.1);
+    border: 2px dashed rgba(255, 255, 255, 0.3);
+    border-radius: 1rem;
+    padding: 2rem;
+    text-align: center;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    display: block;
+    width: 100%;
+    will-change: border-color, background-color;
+}
+
+.file-input-label:hover {
+    border-color: rgba(255, 255, 255, 0.6);
+    background: rgba(255, 255, 255, 0.2);
+}
+
+.file-input-label.file-selected {
+    border-color: #10b981;
+    background: rgba(16, 185, 129, 0.1);
+}
+
+.progress-container {
+    display: none;
+    margin: 1rem 0;
+}
+
+.progress-bar {
+    background: rgba(255, 255, 255, 0.2);
+    border-radius: 0.5rem;
+    height: 0.75rem;
+    overflow: hidden;
+}
+
+.progress-fill {
+    background: linear-gradient(to right, #10b981, #3b82f6);
+    height: 100%;
+    width: 0%;
+    transition: width 0.3s ease;
+    border-radius: 0.5rem;
+    will-change: width;
+}
+
+.mascot-container {
+    text-align: center;
+    margin-bottom: 2rem;
+}
+
+.mascot-img {
+    width: 8rem;
+    height: 8rem;
+    border-radius: 50%;
+    border: 4px solid rgba(255, 255, 255, 0.3);
+    object-fit: cover;
+    animation: float 6s ease-in-out infinite;
+    will-change: transform;
+}
+
+@keyframes float {
+    0%, 100% { transform: translateY(0px); }
+    50% { transform: translateY(-20px); }
+}
+
+/* Utility classes */
+.hidden { display: none !important; }
+.text-white { color: white; }
+.text-center { text-align: center; }
+.mb-2 { margin-bottom: 0.5rem; }
+.mb-4 { margin-bottom: 1rem; }
+.mb-6 { margin-bottom: 1.5rem; }
+.mb-8 { margin-bottom: 2rem; }
+.mt-2 { margin-top: 0.5rem; }
+.mt-8 { margin-top: 2rem; }
+.mt-12 { margin-top: 3rem; }
+.mx-auto { margin-left: auto; margin-right: auto; }
+.space-y-8 > * + * { margin-top: 2rem; }
+.w-6 { width: 1.5rem; }
+.h-6 { height: 1.5rem; }
+.w-12 { width: 3rem; }
+.h-12 { height: 3rem; }
+.inline-block { display: inline-block; }
+.ml-2 { margin-left: 0.5rem; }
+.font-medium { font-weight: 500; }
+.font-bold { font-weight: 700; }
+.text-sm { font-size: 0.875rem; }
+.text-lg { font-size: 1.125rem; }
+.text-4xl { font-size: 2.25rem; }
+
+/* Responsive design */
+@media (max-width: 640px) {
+    .glass-card {
+        margin: 1rem;
+        padding: 1.5rem;
+    }
+    .mascot-img {
+        width: 6rem;
+        height: 6rem;
+    }
+    .text-4xl {
+        font-size: 1.875rem;
+    }
+}
+
+/* Performance optimizations */
+* {
+    box-sizing: border-box;
+}
+
+img {
+    max-width: 100%;
+    height: auto;
+}
+
+/* Reduce motion for users who prefer it */
+@media (prefers-reduced-motion: reduce) {
+    *,
+    *::before,
+    *::after {
+        animation-duration: 0.01ms !important;
+        animation-iteration-count: 1 !important;
+        transition-duration: 0.01ms !important;
+    }
+}
+

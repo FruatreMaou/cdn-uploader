@@ -1,0 +1,558 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Upload File - Modern CDN</title>
+    
+    <!-- Critical resource hints -->
+    <link rel="dns-prefetch" href="//media.tenor.com">
+    <link rel="dns-prefetch" href="//files.catbox.moe">
+    <link rel="dns-prefetch" href="//img.shields.io">
+    <link rel="preconnect" href="https://media.tenor.com">
+    
+    <!-- Optimized favicon -->
+    <link rel="icon" type="image/png" sizes="32x32" href="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNkYPhfDwAChwGA60e6kgAAAABJRU5ErkJggg==">
+    
+    <!-- Inline critical CSS for immediate rendering -->
+    <style>
+        /* Critical above-the-fold CSS */
+        *{box-sizing:border-box}
+        body{
+            background:linear-gradient(135deg,#667eea 0%,#764ba2 25%,#f093fb 50%,#f5576c 75%,#4facfe 100%);
+            background-size:400% 400%;
+            animation:gradientShift 15s ease infinite;
+            font-family:system-ui,-apple-system,sans-serif;
+            min-height:100vh;
+            display:flex;
+            flex-direction:column;
+            align-items:center;
+            justify-content:center;
+            padding:1rem;
+            margin:0;
+            color:#fff
+        }
+        @keyframes gradientShift{
+            0%{background-position:0% 50%}
+            50%{background-position:100% 50%}
+            100%{background-position:0% 50%}
+        }
+        .glass-card{
+            background:rgba(255,255,255,.15);
+            backdrop-filter:blur(20px);
+            border:1px solid rgba(255,255,255,.2);
+            box-shadow:0 25px 45px rgba(0,0,0,.1);
+            border-radius:1.5rem;
+            padding:2rem;
+            width:100%;
+            max-width:32rem;
+            transition:transform .3s ease;
+            will-change:transform
+        }
+        .glass-card:hover{transform:translateY(-4px)}
+        .btn-primary{
+            background:linear-gradient(135deg,#667eea 0%,#764ba2 100%);
+            color:#fff;
+            padding:1rem 2rem;
+            border-radius:1rem;
+            border:none;
+            font-weight:600;
+            width:100%;
+            cursor:pointer;
+            transition:transform .2s ease;
+            will-change:transform
+        }
+        .btn-primary:hover:not(:disabled){transform:scale(1.02)}
+        .btn-primary:disabled{opacity:.5;cursor:not-allowed;transform:none}
+        .btn-secondary{
+            background:rgba(255,255,255,.2);
+            color:#fff;
+            padding:.75rem 1.5rem;
+            border-radius:.75rem;
+            border:1px solid rgba(255,255,255,.3);
+            font-weight:500;
+            cursor:pointer;
+            transition:all .2s ease;
+            margin-top:.5rem
+        }
+        .btn-secondary:hover{
+            background:rgba(255,255,255,.3);
+            transform:scale(1.02)
+        }
+        .file-input-wrapper{position:relative;width:100%}
+        .file-input{position:absolute;left:-9999px;opacity:0}
+        .file-input-label{
+            background:rgba(255,255,255,.1);
+            border:2px dashed rgba(255,255,255,.3);
+            border-radius:1rem;
+            padding:2rem;
+            text-align:center;
+            cursor:pointer;
+            transition:all .3s ease;
+            display:block;
+            width:100%;
+            will-change:border-color,background-color
+        }
+        .file-input-label:hover{
+            border-color:rgba(255,255,255,.6);
+            background:rgba(255,255,255,.2)
+        }
+        .file-input-label.file-selected{
+            border-color:#10b981;
+            background:rgba(16,185,129,.1)
+        }
+        .file-input-label.file-error{
+            border-color:#ef4444;
+            background:rgba(239,68,68,.1)
+        }
+        .progress-container{display:none;margin:1rem 0}
+        .progress-bar{
+            background:rgba(255,255,255,.2);
+            border-radius:.5rem;
+            height:.75rem;
+            overflow:hidden
+        }
+        .progress-fill{
+            background:linear-gradient(to right,#10b981,#3b82f6);
+            height:100%;
+            width:0%;
+            transition:width .3s ease;
+            border-radius:.5rem;
+            will-change:width
+        }
+        .mascot-container{text-align:center;margin-bottom:2rem}
+        .mascot-img{
+            width:8rem;
+            height:8rem;
+            border-radius:50%;
+            border:4px solid rgba(255,255,255,.3);
+            object-fit:cover;
+            animation:float 6s ease-in-out infinite;
+            will-change:transform
+        }
+        @keyframes float{
+            0%,100%{transform:translateY(0)}
+            50%{transform:translateY(-20px)}
+        }
+        .notification{
+            padding:1rem;
+            border-radius:.75rem;
+            margin:1rem 0;
+            font-weight:500;
+            text-align:center;
+            transition:all .3s ease
+        }
+        .notification.success{
+            background:rgba(16,185,129,.2);
+            border:1px solid rgba(16,185,129,.4);
+            color:#10b981
+        }
+        .notification.error{
+            background:rgba(239,68,68,.2);
+            border:1px solid rgba(239,68,68,.4);
+            color:#ef4444
+        }
+        .result-container{
+            display:none;
+            background:rgba(255,255,255,.1);
+            border-radius:1rem;
+            padding:1.5rem;
+            margin-top:1rem;
+            border:1px solid rgba(255,255,255,.2)
+        }
+        .result-link{
+            background:rgba(0,0,0,.3);
+            padding:.75rem;
+            border-radius:.5rem;
+            word-break:break-all;
+            font-family:monospace;
+            font-size:.875rem;
+            margin:.5rem 0;
+            border:1px solid rgba(255,255,255,.2)
+        }
+        .hidden{display:none!important}
+        .text-center{text-align:center}
+        .mb-2{margin-bottom:.5rem}
+        .mb-4{margin-bottom:1rem}
+        .mb-8{margin-bottom:2rem}
+        .mt-2{margin-top:.5rem}
+        .mt-8{margin-top:2rem}
+        .mt-12{margin-top:3rem}
+        .mx-auto{margin-left:auto;margin-right:auto}
+        .space-y-8>*+*{margin-top:2rem}
+        .w-6{width:1.5rem}
+        .h-6{height:1.5rem}
+        .w-12{width:3rem}
+        .h-12{height:3rem}
+        .inline-block{display:inline-block}
+        .ml-2{margin-left:.5rem}
+        .font-medium{font-weight:500}
+        .font-bold{font-weight:700}
+        .text-sm{font-size:.875rem}
+        .text-lg{font-size:1.125rem}
+        .text-4xl{font-size:2.25rem}
+        @media (max-width:640px){
+            .glass-card{margin:1rem;padding:1.5rem}
+            .mascot-img{width:6rem;height:6rem}
+            .text-4xl{font-size:1.875rem}
+        }
+        @media (prefers-reduced-motion:reduce){
+            *,*::before,*::after{
+                animation-duration:.01ms!important;
+                animation-iteration-count:1!important;
+                transition-duration:.01ms!important
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Header dengan Mascot -->
+    <div class="mascot-container">
+        <img src="https://media.tenor.com/yWaLIc5J9WgAAAAj/momoi.gif" 
+             class="mascot-img" 
+             alt="Mascot Animasi"
+             loading="lazy"
+             decoding="async">
+        <h1 class="text-4xl font-bold mb-4">
+            UPLOADER CDN
+        </h1>
+        <p class="text-lg mb-8">
+            Upload file Anda dengan mudah dan dapatkan URL CDN instan untuk berbagi
+        </p>
+    </div>
+
+    <!-- Main Upload Card -->
+    <div class="glass-card">
+        <!-- Notification Area -->
+        <div id="notificationArea"></div>
+
+        <form id="uploadForm" action="/upload" method="post" encType="multipart/form-data" class="space-y-8">
+            <!-- File Input Area -->
+            <div class="file-input-wrapper">
+                <input type="file" name="file" id="fileInput" class="file-input" required>
+                <label for="fileInput" class="file-input-label">
+                    <div id="fileInputContent">
+                        <svg class="w-12 h-12 mx-auto mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12"></path>
+                        </svg>
+                        <p class="font-medium text-lg mb-2">Pilih file untuk diupload</p>
+                        <p class="text-sm mb-2">Klik atau drag & drop file di sini</p>
+                        <small>Ukuran: 10 KB - 100 MB | Tipe: Gambar, Video, Audio, Dokumen</small>
+                    </div>
+                    <div id="fileSelectedContent" class="hidden">
+                        <svg class="w-12 h-12 mx-auto mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" style="color:#10b981">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                        </svg>
+                        <p class="font-medium text-lg mb-2">File siap diupload</p>
+                        <p id="fileName" class="text-sm"></p>
+                        <p id="fileSize" class="text-sm"></p>
+                    </div>
+                </label>
+            </div>
+
+            <!-- Progress Bar -->
+            <div id="progressContainer" class="progress-container">
+                <div class="progress-bar">
+                    <div id="progressFill" class="progress-fill"></div>
+                </div>
+                <p class="text-center mt-2 text-sm">Mengupload file...</p>
+            </div>
+
+            <!-- Upload Button -->
+            <button type="submit" id="uploadButton" class="btn-primary">
+                <span id="buttonText">Upload File</span>
+                <svg id="loadingIcon" class="hidden w-6 h-6 inline-block ml-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                    <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                </svg>
+            </button>
+        </form>
+
+        <!-- Result Container -->
+        <div id="resultContainer" class="result-container">
+            <h3 class="font-bold mb-4 text-center">✅ Upload Berhasil!</h3>
+            <p class="text-sm mb-2">Link CDN Anda:</p>
+            <div id="resultLink" class="result-link"></div>
+            <button id="copyButton" class="btn-secondary w-full">
+                📋 Copy Link
+            </button>
+            <button id="uploadAgainButton" class="btn-secondary w-full">
+                🔄 Upload File Lain
+            </button>
+        </div>
+    </div>
+
+    <!-- Footer -->
+    <footer class="mt-12 text-center">
+        <p class="mb-4 text-lg">Source Code:</p>
+        <a href="https://github.com/Rapikz-kwontwol/web-uploadfile-to-github" 
+           target="_blank" 
+           rel="noopener noreferrer">
+            <img src="https://img.shields.io/badge/GITHUB-gray.svg?style=for-the-badge&logo=github"
+                 alt="GitHub Repository"
+                 loading="lazy"
+                 decoding="async">
+        </a>
+        
+        <!-- Audio Player -->
+        <div class="mt-8">
+            <audio controls preload="none">
+                <source src="https://files.catbox.moe/ar2c1c.mp3" type="audio/mpeg">
+                Browser Anda tidak mendukung audio player.
+            </audio>
+        </div>
+    </footer>
+
+    <!-- Enhanced JavaScript -->
+    <script>
+        (function(){
+            'use strict';
+            
+            // DOM Elements
+            let uploadForm, uploadButton, buttonText, loadingIcon, fileInput, fileInputLabel;
+            let fileInputContent, fileSelectedContent, fileName, fileSize, progressContainer, progressFill;
+            let notificationArea, resultContainer, resultLink, copyButton, uploadAgainButton;
+            
+            // File validation constants
+            const MIN_SIZE = 10 * 1024; // 10 KB
+            const MAX_SIZE = 100 * 1024 * 1024; // 100 MB
+            const ALLOWED_TYPES = [
+                'image/jpeg', 'image/png', 'image/gif', 'image/webp', 'image/svg+xml',
+                'video/mp4', 'video/webm', 'video/ogg', 'video/avi', 'video/mov',
+                'audio/mp3', 'audio/wav', 'audio/ogg', 'audio/m4a',
+                'application/pdf', 'text/plain', 'application/msword',
+                'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
+                'application/zip', 'application/x-rar-compressed'
+            ];
+
+            function init(){
+                // Get DOM elements
+                uploadForm = document.getElementById('uploadForm');
+                uploadButton = document.getElementById('uploadButton');
+                buttonText = document.getElementById('buttonText');
+                loadingIcon = document.getElementById('loadingIcon');
+                fileInput = document.getElementById('fileInput');
+                fileInputLabel = document.querySelector('.file-input-label');
+                fileInputContent = document.getElementById('fileInputContent');
+                fileSelectedContent = document.getElementById('fileSelectedContent');
+                fileName = document.getElementById('fileName');
+                fileSize = document.getElementById('fileSize');
+                progressContainer = document.getElementById('progressContainer');
+                progressFill = document.getElementById('progressFill');
+                notificationArea = document.getElementById('notificationArea');
+                resultContainer = document.getElementById('resultContainer');
+                resultLink = document.getElementById('resultLink');
+                copyButton = document.getElementById('copyButton');
+                uploadAgainButton = document.getElementById('uploadAgainButton');
+                
+                bindEvents();
+            }
+
+            function bindEvents(){
+                fileInput.addEventListener('change', handleFileChange);
+                fileInputLabel.addEventListener('dragover', handleDragOver);
+                fileInputLabel.addEventListener('dragleave', handleDragLeave);
+                fileInputLabel.addEventListener('drop', handleDrop);
+                uploadForm.addEventListener('submit', handleFormSubmit);
+                copyButton.addEventListener('click', handleCopyLink);
+                uploadAgainButton.addEventListener('click', handleUploadAgain);
+                document.addEventListener('keydown', handleKeyDown);
+            }
+
+            function showNotification(message, type = 'error'){
+                notificationArea.innerHTML = `<div class="notification ${type}">${message}</div>`;
+                setTimeout(() => {
+                    notificationArea.innerHTML = '';
+                }, 5000);
+            }
+
+            function formatFileSize(bytes){
+                if (bytes === 0) return '0 Bytes';
+                const k = 1024;
+                const sizes = ['Bytes', 'KB', 'MB', 'GB'];
+                const i = Math.floor(Math.log(bytes) / Math.log(k));
+                return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
+            }
+
+            function validateFile(file){
+                // Check file size
+                if (file.size < MIN_SIZE) {
+                    return `File terlalu kecil! Minimal ${formatFileSize(MIN_SIZE)}`;
+                }
+                if (file.size > MAX_SIZE) {
+                    return `File terlalu besar! Maksimal ${formatFileSize(MAX_SIZE)}`;
+                }
+                
+                // Check file type
+                if (!ALLOWED_TYPES.includes(file.type)) {
+                    return `Tipe file tidak diizinkan! Hanya mendukung: gambar, video, audio, dan dokumen`;
+                }
+                
+                return null; // Valid
+            }
+
+            function handleFileChange(e){
+                if(e.target.files.length > 0){
+                    const file = e.target.files[0];
+                    const validationError = validateFile(file);
+                    
+                    if (validationError) {
+                        showNotification(validationError, 'error');
+                        fileInputLabel.classList.add('file-error');
+                        fileInputLabel.classList.remove('file-selected');
+                        resetFileInput();
+                        return;
+                    }
+                    
+                    // File valid
+                    fileName.textContent = file.name;
+                    fileSize.textContent = formatFileSize(file.size);
+                    fileInputContent.classList.add('hidden');
+                    fileSelectedContent.classList.remove('hidden');
+                    fileInputLabel.classList.add('file-selected');
+                    fileInputLabel.classList.remove('file-error');
+                    
+                    showNotification('✅ File valid dan siap diupload!', 'success');
+                } else {
+                    resetFileInput();
+                }
+            }
+
+            function resetFileInput(){
+                fileInputContent.classList.remove('hidden');
+                fileSelectedContent.classList.add('hidden');
+                fileInputLabel.classList.remove('file-selected', 'file-error');
+                resultContainer.style.display = 'none';
+            }
+
+            function handleDragOver(e){
+                e.preventDefault();
+                this.style.borderColor = 'rgba(255,255,255,0.8)';
+                this.style.background = 'rgba(255,255,255,0.3)';
+            }
+
+            function handleDragLeave(e){
+                e.preventDefault();
+                resetDragStyles();
+            }
+
+            function handleDrop(e){
+                e.preventDefault();
+                resetDragStyles();
+                const files = e.dataTransfer.files;
+                if(files.length > 0){
+                    fileInput.files = files;
+                    fileInput.dispatchEvent(new Event('change'));
+                }
+            }
+
+            function resetDragStyles(){
+                fileInputLabel.style.borderColor = 'rgba(255,255,255,0.3)';
+                fileInputLabel.style.background = 'rgba(255,255,255,0.1)';
+            }
+
+            function handleFormSubmit(e){
+                e.preventDefault();
+                
+                if(!fileInput.files.length){
+                    showNotification('Silakan pilih file terlebih dahulu!', 'error');
+                    return;
+                }
+                
+                const file = fileInput.files[0];
+                const validationError = validateFile(file);
+                
+                if (validationError) {
+                    showNotification(validationError, 'error');
+                    return;
+                }
+                
+                setLoadingState(true);
+                showProgress();
+                simulateUpload();
+            }
+
+            function setLoadingState(loading){
+                uploadButton.disabled = loading;
+                buttonText.textContent = loading ? 'Mengupload...' : 'Upload File';
+                if(loading){
+                    loadingIcon.classList.remove('hidden');
+                } else {
+                    loadingIcon.classList.add('hidden');
+                }
+            }
+
+            function showProgress(){
+                progressContainer.style.display = 'block';
+            }
+
+            function simulateUpload(){
+                let progress = 0;
+                const progressInterval = setInterval(() => {
+                    progress += Math.random() * 15;
+                    if(progress > 90) progress = 90;
+                    progressFill.style.width = progress + '%';
+                }, 200);
+
+                // Simulate upload completion
+                setTimeout(() => {
+                    clearInterval(progressInterval);
+                    progressFill.style.width = '100%';
+                    
+                    // Simulate server response
+                    setTimeout(() => {
+                        handleUploadSuccess('https://cdn-up.fruatrecard.my.id/tmp/' + Date.now() + '_' + fileInput.files[0].name);
+                    }, 500);
+                }, 3000);
+            }
+
+            function handleUploadSuccess(url){
+                setLoadingState(false);
+                progressContainer.style.display = 'none';
+                
+                resultLink.textContent = url;
+                resultContainer.style.display = 'block';
+                
+                showNotification('🎉 File berhasil diupload! Link CDN sudah tersedia.', 'success');
+            }
+
+            function handleCopyLink(){
+                const url = resultLink.textContent;
+                navigator.clipboard.writeText(url).then(() => {
+                    showNotification('📋 Link berhasil disalin ke clipboard!', 'success');
+                }).catch(() => {
+                    // Fallback for older browsers
+                    const textArea = document.createElement('textarea');
+                    textArea.value = url;
+                    document.body.appendChild(textArea);
+                    textArea.select();
+                    document.execCommand('copy');
+                    document.body.removeChild(textArea);
+                    showNotification('📋 Link berhasil disalin!', 'success');
+                });
+            }
+
+            function handleUploadAgain(){
+                fileInput.value = '';
+                resetFileInput();
+                progressFill.style.width = '0%';
+                notificationArea.innerHTML = '';
+            }
+
+            function handleKeyDown(e){
+                if(e.key === 'Enter' && e.target === fileInputLabel){
+                    fileInput.click();
+                }
+            }
+
+            // Initialize when DOM is ready
+            if(document.readyState === 'loading'){
+                document.addEventListener('DOMContentLoaded', init);
+            } else {
+                init();
+            }
+        })();
+    </script>
+</body>
+</html>
+
